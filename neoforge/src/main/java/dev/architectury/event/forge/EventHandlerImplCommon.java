@@ -53,13 +53,13 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.*;
-import net.neoforged.neoforge.event.level.BlockEvent.BreakEvent;
 import net.neoforged.neoforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.neoforged.neoforge.event.level.BlockEvent.FarmlandTrampleEvent;
 import net.neoforged.neoforge.event.level.ChunkDataEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent.Detonate;
 import net.neoforged.neoforge.event.level.ExplosionEvent.Start;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.server.*;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -376,7 +376,13 @@ public class EventHandlerImplCommon {
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void event(BreakEvent event) {
+    public static void event(BreakBlockEvent event) {
+        // Chloe:
+        // This event is fired before neoforge 26.1.2.21.
+        // So we only execute on server side to preserve compatibility.
+        if (event.getLevel().isClientSide()) {
+            return;
+        }
         if (event.getPlayer() instanceof ServerPlayer && event.getLevel() instanceof Level) {
             EventResult result = BlockEvent.BREAK.invoker().breakBlock((Level) event.getLevel(), event.getPos(), event.getState(), (ServerPlayer) event.getPlayer(), null);
             if (result.isFalse()) {
